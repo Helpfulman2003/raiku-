@@ -142,6 +142,8 @@ let curve;
 
 
 
+
+
 let loader = new THREE.GLTFLoader();
 loader.load("dragon_fly.glb", gltf => {
     model = gltf.scene;
@@ -150,21 +152,26 @@ loader.load("dragon_fly.glb", gltf => {
     // Setup animations
     if (gltf.animations && gltf.animations.length) {
         mixer = new THREE.AnimationMixer(model);
+        // Play only the first clip (usually the main one) to avoid conflicts
         let action = mixer.clipAction(gltf.animations[0]);
         action.play();
     }
 
-    // path setup
-    let baseVector = new THREE.Vector3(40, 0, 0);
-    let axis = new THREE.Vector3(0, 1, 0);
+    // Complex random path setup
     let cPts = [];
-    let cSegments = 6;
-    let cStep = Math.PI * 2 / cSegments;
+    let cSegments = 12; // More segments for a more complex "random" orbit
     for (let i = 0; i < cSegments; i++) {
+        let angle = (i / cSegments) * Math.PI * 2;
+        let radius = THREE.MathUtils.randFloat(30, 60); // Reverted radius
         cPts.push(
-            new THREE.Vector3().copy(baseVector)
-                .applyAxisAngle(axis, cStep * i).setY(THREE.MathUtils.randFloat(-10, 10))
+            new THREE.Vector3(
+                Math.cos(angle) * radius,
+                THREE.MathUtils.randFloat(-20, 20), // Reverted vertical variety
+                Math.sin(angle) * radius
+            )
         );
+
+
     }
     curve = new THREE.CatmullRomCurve3(cPts);
     curve.closed = true;
@@ -179,9 +186,9 @@ loader.load("dragon_fly.glb", gltf => {
             child.material.color.set(0x00ff00); // Neon green
             child.material.emissive = new THREE.Color(0x00ff00);
             child.material.emissiveIntensity = 0.5;
-
         }
     });
+
 
 
 
@@ -193,26 +200,22 @@ var clock = new THREE.Clock();
 
 renderer.setAnimationLoop(() => {
     controls.update();
-    let t = clock.getElapsedTime();
     let dt = clock.getDelta();
+    let t = clock.getElapsedTime();
     
     mat.uniforms.uTime.value = t;
     
     if (mixer) mixer.update(dt);
     
     if (model && curve) {
-
-
-        let progress = (t * 0.05) % 1;
+        // Slow movement speed (0.02 instead of 0.05)
+        let progress = (t * 0.015) % 1; 
         let pos = curve.getPointAt(progress);
         let tangent = curve.getTangentAt(progress);
         
         model.position.copy(pos);
         model.lookAt(pos.clone().add(tangent));
-        // Rotate model to face forward along tangent (GLTF models often face -Z)
-        // model.rotateY(Math.PI); 
     }
     
     renderer.render(scene, camera);
 });
-
