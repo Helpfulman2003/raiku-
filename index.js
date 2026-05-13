@@ -71,9 +71,10 @@ instGeom.setAttribute("instLight", new THREE.InstancedBufferAttribute(new Float3
 var mat = new THREE.ShaderMaterial({
     uniforms: {
         uTime: { value: 0 },
-        uLight: { value: new THREE.Color(0x00ff00).multiplyScalar(1.5) },
-        uColor: { value: new THREE.Color(0x004400).multiplyScalar(1) },
-        uFire: { value: new THREE.Color(0xccff00) }
+        uLight: { value: new THREE.Color(0xccff00).multiplyScalar(1.5) },
+        uColor: { value: new THREE.Color(0x334400).multiplyScalar(1) },
+        uFire: { value: new THREE.Color(0xffff00) }
+
     },
 
     vertexShader: `
@@ -183,8 +184,9 @@ loader.load("dragon_fly.glb", gltf => {
     model.traverse(child => {
         if (child.isMesh) {
             child.material.wireframe = true;
-            child.material.color.set(0x00ff00); // Neon green
-            child.material.emissive = new THREE.Color(0x00ff00);
+            child.material.color.set(0xccff00); // Specific lime neon green
+            child.material.emissive = new THREE.Color(0xccff00);
+
             child.material.emissiveIntensity = 0.5;
         }
     });
